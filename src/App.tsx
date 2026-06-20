@@ -696,6 +696,7 @@ export default function App() {
             LEFT SIDE: THE WORLD VIEWER & TOY STATS (6 cols)
            ========================================== */}
         <section className="col-span-1 lg:col-span-6 flex flex-col gap-6" id="kids_screen_planet_view">
+          <h2 className="sr-only">Planet Overview and Metrics</h2>
           
           {/* Unified Console Panel containing Canvas and Metrics */}
           <div className="bg-slate-900 border-4 border-slate-950 rounded-3xl p-5 shadow-[6px_6px_0px_#000] relative flex flex-col gap-5">
@@ -891,6 +892,7 @@ export default function App() {
             RIGHT SIDE: QUESTS, TOYSTORE, GALAXY & AVATARS (6 cols)
            ========================================== */}
         <section className="col-span-1 lg:col-span-6 flex flex-col gap-6" id="kids_screen_game_controls">
+          <h2 className="sr-only">Ecosystem Dashboard & Quests</h2>
           
           {/* Main Playful Interactive Tab Switchers */}
           <div className="flex bg-slate-950 rounded-2xl p-1.5 border-4 border-slate-950 shadow-[4px_4px_0px_#000]">
@@ -1346,7 +1348,7 @@ export default function App() {
             <form onSubmit={authMode === "login" ? handleLogin : handleSignup} className="space-y-4">
               {authMode === "register" && (
                 <div>
-                  <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wide mb-1">
+                  <label htmlFor="auth-username" className="block text-[10px] uppercase font-black text-slate-400 tracking-wide mb-1">
                     Citizen Username
                   </label>
                   <div className="relative">
@@ -1354,6 +1356,7 @@ export default function App() {
                       <User className="w-4 h-4" />
                     </span>
                     <input
+                      id="auth-username"
                       type="text"
                       required
                       placeholder="e.g. Hanna"
@@ -1366,7 +1369,7 @@ export default function App() {
               )}
 
               <div>
-                <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wide mb-1">
+                <label htmlFor="auth-email" className="block text-[10px] uppercase font-black text-slate-400 tracking-wide mb-1">
                   Email Address
                 </label>
                 <div className="relative">
@@ -1374,6 +1377,7 @@ export default function App() {
                     <Mail className="w-4 h-4" />
                   </span>
                   <input
+                    id="auth-email"
                     type="email"
                     required
                     placeholder="hanna@odyssey.org"
@@ -1385,7 +1389,7 @@ export default function App() {
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wide mb-1">
+                <label htmlFor="auth-password" className="block text-[10px] uppercase font-black text-slate-400 tracking-wide mb-1">
                   Access Code (Password)
                 </label>
                 <div className="relative">
@@ -1393,6 +1397,7 @@ export default function App() {
                     <Key className="w-4 h-4" />
                   </span>
                   <input
+                    id="auth-password"
                     type="password"
                     required
                     placeholder="••••••••"
@@ -1406,10 +1411,11 @@ export default function App() {
               {authMode === "register" && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wide mb-1">
+                    <label htmlFor="auth-avatar" className="block text-[10px] uppercase font-black text-slate-400 tracking-wide mb-1">
                       Choose Avatar
                     </label>
                     <select
+                      id="auth-avatar"
                       value={authAvatar}
                       onChange={(e) => setAuthAvatar(e.target.value)}
                       className="w-full bg-slate-950 border-2 border-slate-850 focus:border-emerald-400 rounded-xl p-2 text-xs text-slate-100 outline-none cursor-pointer"
@@ -1423,10 +1429,11 @@ export default function App() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] uppercase font-black text-slate-400 tracking-wide mb-1">
+                    <label htmlFor="auth-class" className="block text-[10px] uppercase font-black text-slate-400 tracking-wide mb-1">
                       Eco Class
                     </label>
                     <select
+                      id="auth-class"
                       value={authClass}
                       onChange={(e) => setAuthClass(e.target.value)}
                       className="w-full bg-slate-950 border-2 border-slate-850 focus:border-emerald-400 rounded-xl p-2 text-xs text-slate-100 outline-none cursor-pointer"

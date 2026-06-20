@@ -93,6 +93,26 @@ export const PlanetCanvas: React.FC<PlanetCanvasProps> = ({
     }, 4000);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
+    autoRotate.current = false;
+    if (e.key === "ArrowLeft") {
+      rotYRef.current -= 0.05;
+    } else if (e.key === "ArrowRight") {
+      rotYRef.current += 0.05;
+    } else if (e.key === "ArrowUp") {
+      rotXRef.current = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, rotXRef.current - 0.05));
+    } else if (e.key === "ArrowDown") {
+      rotXRef.current = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, rotXRef.current + 0.05));
+    } else {
+      return;
+    }
+    e.preventDefault();
+    updateLonIndicator();
+    setTimeout(() => {
+      if (!isDragging) autoRotate.current = true;
+    }, 4000);
+  };
+
   // Safe deterministic pseudo-random number generator to place consistent objects on the planet coordinates
   const seededRandom = (seed: number) => {
     let state = seed;
@@ -1162,18 +1182,24 @@ export const PlanetCanvas: React.FC<PlanetCanvasProps> = ({
 
       <canvas
         ref={canvasRef}
-        className="w-full h-full cursor-grab active:cursor-grabbing max-h-[460px]"
+        className="w-full h-full cursor-grab active:cursor-grabbing max-h-[460px] focus:outline-none focus:ring-4 focus:ring-emerald-400/50 rounded-2xl"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
         id="green_odyssey_planet_canvas"
-      />
+        role="img"
+        aria-label={`Interactive 3D Planet Evolution sphere. Current stage: ${level} out of 100. Planetary Health: ${health}%, Biodiversity: ${biodiversity}%, Water quality: ${waterQuality}%, Air quality: ${airQuality}%, Clean power grid: ${renewablePercent}%, Citizen Happiness: ${happiness}%. Use arrow keys to rotate the view.`}
+      >
+        Interactive 3D Planet Evolution sphere. Current stage: {level} out of 100. Planetary Health: {health}%, Biodiversity: {biodiversity}%, Water quality: {waterQuality}%, Air quality: {airQuality}%, Clean power grid: {renewablePercent}%, Citizen Happiness: {happiness}%. Use arrow keys to rotate the view.
+      </canvas>
 
       {/* Elegant rotation guideline overlay */}
       <div className="absolute bottom-4 inset-x-0 text-center pointer-events-none drop-shadow-md z-10">
         <p className="text-[9px] text-slate-400 bg-slate-950/90 rounded-full px-4 py-1 inline-block border border-slate-800/80 font-mono tracking-wide shadow-lg">
-          🕹️ Left-click and slide mouse coordinates to spin the planetary viewport
+          🕹️ Left-click + drag or use Arrow keys to spin the planetary viewport
         </p>
       </div>
     </div>
