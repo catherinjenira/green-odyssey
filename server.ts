@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
@@ -169,7 +169,7 @@ app.post("/api/user/sync", async (req, res) => {
 });
 
 // Global error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error("Unhandled API Error:", err);
   res.status(500).json({
     error: "Internal Server Error",

@@ -4,6 +4,7 @@ import crypto from "crypto";
 
 dotenv.config();
 
+// Secure Salted Password Hashing
 export function hashPassword(password: string, email: string): string {
   const salt = email.toLowerCase() + "_green_odyssey_salt_987";
   return crypto.createHmac("sha256", salt).update(password).digest("hex");
@@ -17,85 +18,150 @@ const DB_NAME = process.env.DB_NAME || "green_odyssey";
 
 let pool: mysql.Pool;
 
+// Hybrid Fallback Storage
+export let useFallback = false;
+const fallbackUsers = new Map<string, any>(); // email -> user profile (password hashed)
+const fallbackStates = new Map<string, any>(); // user_id -> planet_state
+const fallbackItems = new Map<string, any[]>(); // user_id -> items array
+
 export async function initDB() {
-  // First, connect without a specific database to ensure it exists
-  const connection = await mysql.createConnection({
-    host: DB_HOST,
-    port: DB_PORT,
-    user: DB_USER,
-    password: DB_PASSWORD,
-  });
+  try {
+    // Attempt connection to local/cloud MySQL server
+    const connection = await mysql.createConnection({
+      host: DB_HOST,
+      port: DB_PORT,
+      user: DB_USER,
+      password: DB_PASSWORD,
+      connectTimeout: 2500 // 2.5 seconds timeout
+    });
 
-  await connection.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\``);
-  await connection.end();
+    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\``);
+    await connection.end();
 
-  // Create connection pool with the database specified
-  pool = mysql.createPool({
-    host: DB_HOST,
-    port: DB_PORT,
-    user: DB_USER,
-    password: DB_PASSWORD,
-    database: DB_NAME,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-  });
+    // Create pool connection
+    pool = mysql.createPool({
+      host: DB_HOST,
+      port: DB_PORT,
+      user: DB_USER,
+      password: DB_PASSWORD,
+      database: DB_NAME,
+      waitForConnections: true,
+      connectionLimit: 5,
+      queueLimit: 0,
+      connectTimeout: 2500
+    });
 
-  // Create tables
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS users (
-      id VARCHAR(50) PRIMARY KEY,
-      username VARCHAR(100) NOT NULL,
-      email VARCHAR(150) NOT NULL UNIQUE,
-      password VARCHAR(255) NOT NULL,
-      avatar VARCHAR(50) NOT NULL,
-      character_class VARCHAR(100) NOT NULL,
-      planet_name VARCHAR(150) NOT NULL,
-      joined_at VARCHAR(50) NOT NULL
-    )
-  `);
+    // Test a connection get/release
+    const testConn = await pool.getConnection();
+    testConn.release();
 
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS planet_states (
-      user_id VARCHAR(50) PRIMARY KEY,
-      level INT NOT NULL,
-      xp INT NOT NULL,
-      xp_needed INT NOT NULL,
-      carbon_score DOUBLE NOT NULL,
-      biodiversity DOUBLE NOT NULL,
-      health DOUBLE NOT NULL,
-      happiness DOUBLE NOT NULL,
-      air_quality DOUBLE NOT NULL,
-      water_quality DOUBLE NOT NULL,
-      renewable_percent DOUBLE NOT NULL,
-      carbon_saved DOUBLE NOT NULL,
-      eco_coins INT NOT NULL,
-      gems INT NOT NULL,
-      credits INT NOT NULL,
-      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-    )
-  `);
+    // Create tables
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id VARCHAR(50) PRIMARY KEY,
+        username VARCHAR(100) NOT NULL,
+        email VARCHAR(150) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        avatar VARCHAR(50) NOT NULL,
+        character_class VARCHAR(100) NOT NULL,
+        planet_name VARCHAR(150) NOT NULL,
+        joined_at VARCHAR(50) NOT NULL
+      )
+    `);
 
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS user_market_items (
-      user_id VARCHAR(50),
-      item_id VARCHAR(100),
-      purchased_count INT NOT NULL DEFAULT 0,
-      PRIMARY KEY (user_id, item_id),
-      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-    )
-  `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS planet_states (
+        user_id VARCHAR(50) PRIMARY KEY,
+        level INT NOT NULL,
+        xp INT NOT NULL,
+        xp_needed INT NOT NULL,
+        carbon_score DOUBLE NOT NULL,
+        biodiversity DOUBLE NOT NULL,
+        health DOUBLE NOT NULL,
+        happiness DOUBLE NOT NULL,
+        air_quality DOUBLE NOT NULL,
+        water_quality DOUBLE NOT NULL,
+        renewable_percent DOUBLE NOT NULL,
+        carbon_saved DOUBLE NOT NULL,
+        eco_coins INT NOT NULL,
+        gems INT NOT NULL,
+        credits INT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
 
-  console.log("MySQL database initialized successfully.");
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS user_market_items (
+        user_id VARCHAR(50),
+        item_id VARCHAR(100),
+        purchased_count INT NOT NULL DEFAULT 0,
+        PRIMARY KEY (user_id, item_id),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
+
+    console.log("MySQL database initialized successfully.");
+  } catch (dbError) {
+    console.warn("MySQL connection failed. Falling back to robust In-Memory database storage.", dbError.message || dbError);
+    useFallback = true;
+  }
 }
 
 export async function getUserByEmail(email: string) {
+  if (useFallback) {
+    const normalized = email.toLowerCase();
+    return fallbackUsers.get(normalized) || null;
+  }
   const [users] = await pool.query<any[]>("SELECT * FROM users WHERE LOWER(email) = LOWER(?)", [email]);
   if (users.length === 0) return null;
   return users[0];
 }
 
 export async function getUserState(userId: string) {
+  if (useFallback) {
+    let userObj = null;
+    for (const u of fallbackUsers.values()) {
+      if (u.id === userId) {
+        userObj = u;
+        break;
+      }
+    }
+    if (!userObj) return null;
+
+    const stateObj = fallbackStates.get(userId) || {
+      level: 1,
+      xp: 0,
+      xpNeeded: 100,
+      carbonScore: 180,
+      biodiversity: 8,
+      health: 12,
+      happiness: 35,
+      airQuality: 20,
+      waterQuality: 15,
+      renewablePercent: 0,
+      carbonSaved: 0,
+      ecoCoins: 200,
+      gems: 10,
+      credits: 0
+    };
+    
+    const itemsArr = fallbackItems.get(userId) || [];
+
+    return {
+      profile: {
+        id: userObj.id,
+        username: userObj.username,
+        email: userObj.email,
+        avatar: userObj.avatar,
+        characterClass: userObj.characterClass,
+        planetName: userObj.planetName,
+        joinedAt: userObj.joinedAt
+      },
+      state: stateObj,
+      items: itemsArr
+    };
+  }
+
   const [users] = await pool.query<any[]>("SELECT * FROM users WHERE id = ?", [userId]);
   if (users.length === 0) return null;
   const user = users[0];
@@ -137,6 +203,24 @@ export async function getUserState(userId: string) {
 }
 
 export async function registerUser(profile: any, state: any, items: any[]) {
+  if (useFallback) {
+    const hashedPass = hashPassword(profile.customPassword, profile.email);
+    const savedProfile = {
+      id: profile.id,
+      username: profile.username,
+      email: profile.email,
+      password: hashedPass,
+      avatar: profile.avatar,
+      characterClass: profile.characterClass,
+      planetName: profile.planetName,
+      joinedAt: profile.joinedAt
+    };
+    fallbackUsers.set(profile.email.toLowerCase(), savedProfile);
+    fallbackStates.set(profile.id, state);
+    fallbackItems.set(profile.id, items.map(itm => ({ id: itm.id, purchasedCount: itm.purchasedCount })));
+    return;
+  }
+
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
@@ -195,11 +279,16 @@ export async function registerUser(profile: any, state: any, items: any[]) {
 }
 
 export async function syncUserState(userId: string, state: any, items: any[]) {
+  if (useFallback) {
+    fallbackStates.set(userId, state);
+    fallbackItems.set(userId, items.map(itm => ({ id: itm.id, purchasedCount: itm.purchasedCount })));
+    return;
+  }
+
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
 
-    // Update planet state
     await connection.query(
       `UPDATE planet_states SET 
         level = ?, 
@@ -236,7 +325,6 @@ export async function syncUserState(userId: string, state: any, items: any[]) {
       ]
     );
 
-    // Sync items - insert or update
     for (const item of items) {
       await connection.query(
         `INSERT INTO user_market_items (user_id, item_id, purchased_count) 
