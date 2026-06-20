@@ -12,6 +12,15 @@ const PORT = 3000;
 
 app.use(express.json());
 
+// Security Headers Middleware
+app.use((req, res, next) => {
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("Referrer-Policy", "no-referrer-when-downgrade");
+  next();
+});
+
 // Initialize Gemini Client
 const apiKey = process.env.GEMINI_API_KEY;
 let ai: GoogleGenAI | null = null;
@@ -157,6 +166,15 @@ app.post("/api/user/sync", async (req, res) => {
     console.error("Error syncing user state:", error);
     return res.status(500).json({ error: "Failed to sync state.", details: error.message });
   }
+});
+
+// Global error handling middleware
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error("Unhandled API Error:", err);
+  res.status(500).json({
+    error: "Internal Server Error",
+    message: err.message || "An unhandled error occurred on the server."
+  });
 });
 
 // Setup Vite or Production build

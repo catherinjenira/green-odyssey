@@ -275,29 +275,33 @@ export default function App() {
     }
   }, []);
 
-  // --- State changes autosave mechanism ---
+  // --- State changes autosave mechanism with 1.5s debounce ---
   useEffect(() => {
     if (currentUser && isLoaded) {
-      const syncState = async () => {
-        try {
-          const itemsToSync = marketItems.map(itm => ({
-            id: itm.id,
-            purchasedCount: itm.purchasedCount
-          }));
-          await fetch("/api/user/sync", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              userId: currentUser.id,
-              state: planetState,
-              items: itemsToSync
-            })
-          });
-        } catch (err) {
-          console.error("Failed to auto-sync state with database:", err);
-        }
-      };
-      syncState();
+      const delayDebounceFn = setTimeout(() => {
+        const syncState = async () => {
+          try {
+            const itemsToSync = marketItems.map(itm => ({
+              id: itm.id,
+              purchasedCount: itm.purchasedCount
+            }));
+            await fetch("/api/user/sync", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                userId: currentUser.id,
+                state: planetState,
+                items: itemsToSync
+              })
+            });
+          } catch (err) {
+            console.error("Failed to auto-sync state with database:", err);
+          }
+        };
+        syncState();
+      }, 1500);
+
+      return () => clearTimeout(delayDebounceFn);
     }
   }, [planetState, marketItems, currentUser, isLoaded]);
 
@@ -1455,6 +1459,33 @@ export default function App() {
               </button>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* Dynamic Accessible Toast Notification Overlay */}
+      {toast && (
+        <div
+          role="alert"
+          aria-live="polite"
+          className={`fixed bottom-6 right-6 z-50 max-w-sm p-4 rounded-2xl border-4 shadow-[4px_4px_0px_#000] flex items-center gap-3 transition-all duration-350 ${
+            toast.type === "success"
+              ? "bg-emerald-950/95 border-emerald-500 text-emerald-100"
+              : toast.type === "level"
+              ? "bg-purple-950/95 border-purple-500 text-purple-100"
+              : "bg-slate-900/95 border-slate-700 text-slate-100"
+          }`}
+        >
+          <span className="text-lg">
+            {toast.type === "success" ? "🏆" : toast.type === "level" ? "🌟" : "ℹ️"}
+          </span>
+          <p className="text-xs font-black tracking-wide leading-relaxed font-sans">{toast.message}</p>
+          <button
+            onClick={() => setToast(null)}
+            className="ml-auto text-[10px] uppercase font-black tracking-widest text-slate-500 hover:text-slate-200 cursor-pointer pl-2"
+            aria-label="Dismiss notification"
+          >
+            Close
+          </button>
         </div>
       )}
 
