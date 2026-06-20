@@ -1,0 +1,6 @@
+{
+  "name": "Green Odyssey",
+  "description": "Embark on an epic planetary-scale journey to build real ecosystem stability, lower carbon footprints, and guide a lifeless sphere through 100 levels of lush, futuristic green evolution.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
