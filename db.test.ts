@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { hashPassword, registerUser, getUserByEmail, getUserState, syncUserState, initDB, useFallback, deleteUserForTest } from "./db";
+import { hashPassword, registerUser, getUserByEmail, getUserState, syncUserState, initDB, useFallback, deleteUserForTest } from "./db.ts";
 
 beforeAll(async () => {
   // Initialize DB. This will set up connection or trigger useFallback = true automatically.

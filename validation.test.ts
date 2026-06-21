@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { validateEmail, validateUsername, validatePassword, validatePlanetState } from "./validation";
-import { PlanetState } from "./src/types";
+import { validateEmail, validateUsername, validatePassword, validatePlanetState } from "./validation.ts";
+import { PlanetState } from "./src/types.ts";
 
 describe("Email Format Validation", () => {
   it("should validate correct email addresses", () => {

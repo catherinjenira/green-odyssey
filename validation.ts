@@ -1,4 +1,4 @@
-import { PlanetState } from "./src/types";
+import { PlanetState } from "./src/types.ts";
 
 // Email validation regex (standard RFC 5322 compatible)
 export const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
