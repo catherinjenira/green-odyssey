@@ -108,7 +108,17 @@ export async function initDB() {
   }
 }
 
+let dbInitializedPromise: Promise<void> | null = null;
+
+export async function ensureDB() {
+  if (!dbInitializedPromise) {
+    dbInitializedPromise = initDB();
+  }
+  await dbInitializedPromise;
+}
+
 export async function getUserByEmail(email: string) {
+  await ensureDB();
   if (useFallback) {
     const normalized = email.toLowerCase();
     return fallbackUsers.get(normalized) || null;
@@ -119,6 +129,7 @@ export async function getUserByEmail(email: string) {
 }
 
 export async function getUserState(userId: string) {
+  await ensureDB();
   if (useFallback) {
     let userObj = null;
     for (const u of fallbackUsers.values()) {
@@ -204,6 +215,7 @@ export async function getUserState(userId: string) {
 }
 
 export async function registerUser(profile: CitizenUser, state: PlanetState, items: { id: string; purchasedCount: number }[]) {
+  await ensureDB();
   if (useFallback) {
     const hashedPass = hashPassword(profile.customPassword, profile.email);
     const savedProfile = {
@@ -280,6 +292,7 @@ export async function registerUser(profile: CitizenUser, state: PlanetState, ite
 }
 
 export async function syncUserState(userId: string, state: PlanetState, items: { id: string; purchasedCount: number }[]) {
+  await ensureDB();
   if (useFallback) {
     fallbackStates.set(userId, state);
     fallbackItems.set(userId, items.map(itm => ({ id: itm.id, purchasedCount: itm.purchasedCount })));
@@ -345,6 +358,7 @@ export async function syncUserState(userId: string, state: PlanetState, items: {
 }
 
 export async function deleteUserForTest(userId: string) {
+  await ensureDB();
   if (useFallback) {
     fallbackStates.delete(userId);
     fallbackItems.delete(userId);
