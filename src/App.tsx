@@ -44,6 +44,340 @@ import {
 } from "./data";
 import { PlanetState, Challenge, MarketItem, FriendPlanet, WeeklyEvent, Achievement, CitizenUser } from "./types";
 
+const PREVIEW_COMPANIONS = [
+  {
+    name: "Moso (Panda)",
+    avatar: "🐼",
+    role: "Forests & Agriculture",
+    color: "border-emerald-500 text-emerald-400 bg-emerald-950/40",
+    bubbleColor: "bg-emerald-950/80 border-emerald-500 text-emerald-200",
+    quote: "*yawn, munching on bamboo* Oh, hello! Did you know trees absorb carbon so softly? Let's plant more forests together! Try taking a quick walk or selecting Bicycles next time!",
+    specialty: "Biodiversity & Soil Health restoration tips"
+  },
+  {
+    name: "Bramble (Turtle)",
+    avatar: "🐢",
+    role: "Ocean & Water Purity",
+    color: "border-cyan-500 text-cyan-400 bg-cyan-950/40",
+    bubbleColor: "bg-cyan-950/80 border-cyan-500 text-cyan-200",
+    quote: "*Blinks ocean-wise eyes* Water... is the mirror of our soul. Reduce plastic waste today to save my marine friends!",
+    specialty: "Ocean plastic cleanups & wastewater purification"
+  },
+  {
+    name: "Rusty (Fox)",
+    avatar: "🦊",
+    role: "Public Transit & Smart Grid",
+    color: "border-amber-500 text-amber-400 bg-amber-950/40",
+    bubbleColor: "bg-amber-950/80 border-amber-500 text-amber-200",
+    quote: "*Yips with snappy excitement* Rusty here! Sleek work on keeping carbon low! Did you know riding a bicycle preserves XP and cuts emissions to zero? Clever choice!",
+    specialty: "Smart urban setups & grid battery sharing hacks"
+  },
+  {
+    name: "Chilly (Penguin)",
+    avatar: "🐧",
+    role: "Renewable Energy & Glaciers",
+    color: "border-sky-500 text-sky-400 bg-sky-950/40",
+    bubbleColor: "bg-sky-950/80 border-sky-500 text-sky-200",
+    quote: "*Flaps flippers with concern* Keep the climate cool, please! If carbon hits high scores, our glaciers start weeping. We must expand renewable grids immediately. Can we use solar energy?",
+    specialty: "Atmosphere monitoring & clean power grids"
+  },
+  {
+    name: "Eco-9 (Robot)",
+    avatar: "🤖",
+    role: "Metrics & Carbon Capture",
+    color: "border-purple-500 text-purple-400 bg-purple-950/40",
+    bubbleColor: "bg-purple-950/80 border-purple-500 text-purple-200",
+    quote: "[ECO-9 ONLINE] System diagnostics show planetary health is currently low. Integrating clean energy infrastructure will improve efficiency by 34.2%. Awaiting further inputs, Space Guardian!",
+    specialty: "Advanced calculations & bio-gas recovery loops"
+  }
+];
+
+interface LandingPageProps {
+  onStart: () => void;
+  onLogin: () => void;
+}
+
+function LandingPage({ onStart, onLogin }: LandingPageProps) {
+  const [activeCompanion, setActiveCompanion] = useState<number>(0);
+  
+  const previewItems: MarketItem[] = INITIAL_MARKET_ITEMS.map((item) => {
+    if (item.id === "m_tree") return { ...item, purchasedCount: 8 };
+    if (item.id === "m_patch") return { ...item, purchasedCount: 6 };
+    if (item.id === "m_lake") return { ...item, purchasedCount: 4 };
+    if (item.id === "m_wind") return { ...item, purchasedCount: 3 };
+    if (item.id === "m_solar") return { ...item, purchasedCount: 3 };
+    if (item.id === "m_vertical") return { ...item, purchasedCount: 2 };
+    if (item.id === "m_birds") return { ...item, purchasedCount: 4 };
+    return { ...item, purchasedCount: 0 };
+  });
+
+  return (
+    <div className="relative w-full text-slate-100 z-10 flex flex-col min-h-screen">
+      {/* Frontpage Navigation */}
+      <header className="w-full max-w-6xl mx-auto px-4 py-4 flex items-center justify-between z-30">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-emerald-400 rounded-2xl border-4 border-slate-950 shadow-[3px_3px_0px_#000] flex items-center justify-center animate-pulse">
+            <Globe className="w-6 h-6 text-slate-900" />
+          </div>
+          <div>
+            <h1 className="text-xl font-black tracking-wider text-emerald-400 uppercase drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+              Green Odyssey
+            </h1>
+            <p className="text-[9px] text-emerald-300/80 font-mono tracking-wide">
+              Eco-companion & planet simulator
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 sm:gap-4">
+          <button
+            onClick={onLogin}
+            className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-black uppercase text-slate-300 hover:text-emerald-400 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+          >
+            Sign In
+          </button>
+          <button
+            onClick={onStart}
+            className="px-4 py-1.5 sm:px-5 sm:py-2 bg-emerald-400 hover:bg-emerald-300 text-slate-950 text-xs font-black uppercase rounded-xl border-3 border-slate-950 shadow-[3px_3px_0px_#000] hover:scale-105 active:scale-95 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+          >
+            Get Passport
+          </button>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="w-full max-w-6xl mx-auto px-4 py-8 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div className="lg:col-span-6 flex flex-col gap-6 text-left">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 text-xs font-semibold w-fit">
+            <Sparkles className="w-4 h-4 text-amber-400 animate-spin" style={{ animationDuration: '8s' }} />
+            New: Google Gemini Powered Companions
+          </div>
+          
+          <h2 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight text-white uppercase drop-shadow-md">
+            Evolve your own <span className="text-emerald-400 block sm:inline">Green Utopia</span>
+          </h2>
+          
+          <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-xl">
+            Green Odyssey is an immersive planet evolution simulator where your daily sustainability choices directly shape a barren dust-rock into a thriving ecological paradise. Backed by state-of-the-art AI Companions that guide you through your journey.
+          </p>
+
+          {/* Quick Metrics Stats Bar */}
+          <div className="grid grid-cols-3 gap-3 bg-slate-950/60 border-2 border-slate-850 p-4 rounded-2xl max-w-md shadow-inner backdrop-blur-xs">
+            <div>
+              <span className="block text-[8px] uppercase tracking-wider text-slate-500 font-bold">Max Stage</span>
+              <span className="text-sm font-black text-amber-400 font-mono font-bold">Stage 100</span>
+            </div>
+            <div>
+              <span className="block text-[8px] uppercase tracking-wider text-slate-500 font-bold">AI Advisors</span>
+              <span className="text-sm font-black text-cyan-400 font-mono font-bold">5 Sectors</span>
+            </div>
+            <div>
+              <span className="block text-[8px] uppercase tracking-wider text-slate-500 font-bold">Challenges</span>
+              <span className="text-sm font-black text-purple-400 font-mono font-bold">50+ Quests</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mt-2">
+            <button
+              onClick={onStart}
+              className="px-6 py-3.5 bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 text-slate-950 text-xs font-black uppercase rounded-2xl border-4 border-slate-950 shadow-[4px_4px_0px_#000] hover:scale-105 active:scale-95 transition-all text-center flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+            >
+              Launch Your Odyssey
+              <ArrowRight className="w-4 h-4 text-slate-950" />
+            </button>
+            <a
+              href="#companions"
+              className="px-6 py-3.5 border-3 border-slate-800 hover:border-slate-600 bg-slate-900/60 text-slate-300 hover:text-white text-xs font-black uppercase rounded-2xl text-center transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+            >
+              Meet Companions
+            </a>
+          </div>
+        </div>
+
+        {/* Live Spinning Preview Planet */}
+        <div className="lg:col-span-6 flex justify-center relative">
+          <div className="relative p-1 bg-gradient-to-tr from-slate-900 to-slate-950 border-4 border-slate-950 rounded-3xl shadow-2xl w-full max-w-[420px] aspect-square overflow-hidden group">
+            <div className="absolute top-4 left-4 bg-slate-950/80 border border-slate-800 text-[10px] font-mono text-emerald-300 px-3 py-1 rounded-full flex items-center gap-1.5 shadow-md z-20">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              LIVE PREVIEW: STAGE 100 UTOPIA
+            </div>
+            
+            <div className="absolute bottom-4 right-4 bg-slate-950/80 border border-slate-800 text-[9px] font-mono text-slate-400 px-3 py-1 rounded-full shadow-md z-20">
+              🖱️ Drag to rotate sphere
+            </div>
+
+            <div className="w-full h-full scale-[1.02]">
+              <PlanetCanvas
+                level={100}
+                health={98}
+                biodiversity={95}
+                waterQuality={95}
+                airQuality={98}
+                renewablePercent={100}
+                happiness={98}
+                marketItems={previewItems}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="w-full max-w-6xl mx-auto px-4 py-12 border-t-2 border-slate-850">
+        <div className="text-center max-w-xl mx-auto flex flex-col gap-2 mb-10">
+          <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-400">Core Mechanics</span>
+          <h3 className="text-2xl font-black text-white uppercase">How The Simulation Works</h3>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Every action you take in the real world or decide inside our simulator changes the ecological equations of your personal planet.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-slate-950/60 border-2 border-slate-850 p-6 rounded-2xl shadow-md text-left flex flex-col gap-3 group hover:border-emerald-500/50 transition-colors">
+            <div className="w-10 h-10 bg-emerald-950 border border-emerald-500/30 text-emerald-400 rounded-xl flex items-center justify-center">
+              <Leaf className="w-5 h-5" />
+            </div>
+            <h4 className="text-sm font-black text-white uppercase">1. Resolve Daily Quests</h4>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Make decisions regarding transportation, agriculture, waste management, and energy generation. Watch the direct consequences on carbon emissions and ecosystem health.
+            </p>
+          </div>
+
+          <div className="bg-slate-950/60 border-2 border-slate-850 p-6 rounded-2xl shadow-md text-left flex flex-col gap-3 group hover:border-amber-500/50 transition-colors">
+            <div className="w-10 h-10 bg-amber-950 border border-amber-500/30 text-amber-400 rounded-xl flex items-center justify-center">
+              <Trees className="w-5 h-5" />
+            </div>
+            <h4 className="text-sm font-black text-white uppercase">2. Build Your Sandbox</h4>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Use earned Eco-Coins to purchase specialized items from the Shop—like wind turbines, solar panels, and wildflower patches—to populate your planet in real-time.
+            </p>
+          </div>
+
+          <div className="bg-slate-950/60 border-2 border-slate-850 p-6 rounded-2xl shadow-md text-left flex flex-col gap-3 group hover:border-cyan-500/50 transition-colors">
+            <div className="w-10 h-10 bg-cyan-950 border border-cyan-500/30 text-cyan-400 rounded-xl flex items-center justify-center">
+              <Users className="w-5 h-5" />
+            </div>
+            <h4 className="text-sm font-black text-white uppercase">3. Cooperate in the Galaxy</h4>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Explore sibling worlds developed by other planetary guardians across the cosmos, send encouragement hearts, and strive for the top spots in the cosmic federation.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* AI Companions Showcase */}
+      <section id="companions" className="w-full max-w-6xl mx-auto px-4 py-12 border-t-2 border-slate-850 bg-[radial-gradient(ellipse_at_bottom,rgba(16,185,129,0.04),rgba(0,0,0,0))]">
+        <div className="text-center max-w-xl mx-auto flex flex-col gap-2 mb-10">
+          <span className="text-[10px] uppercase font-bold tracking-widest text-cyan-400">Context-Aware Advisory</span>
+          <h3 className="text-2xl font-black text-white uppercase">Meet Your AI Companions</h3>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Our five specialists are powered by Gemini 3.5 Flash. They read your planet state dynamically and offer custom advice to help clear atmospheric smog.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Companion selector list */}
+          <div className="lg:col-span-5 flex flex-col gap-2">
+            {PREVIEW_COMPANIONS.map((comp, idx) => (
+              <button
+                key={comp.name}
+                onClick={() => setActiveCompanion(idx)}
+                className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center gap-3 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent ${
+                  activeCompanion === idx
+                    ? `${comp.color} shadow-md`
+                    : "border-slate-855 hover:border-slate-800 bg-slate-950/40 text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                <span className="text-2xl">{comp.avatar}</span>
+                <div className="flex-1">
+                  <h4 className={`text-xs font-black uppercase ${activeCompanion === idx ? "" : "text-slate-300"}`}>
+                    {comp.name}
+                  </h4>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase mt-0.5">{comp.role}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Interactive Chat Speech bubble simulation */}
+          <div className="lg:col-span-7 flex flex-col h-full justify-between">
+            <div className="bg-slate-950/80 border-2 border-slate-850 rounded-3xl p-6 shadow-xl flex flex-col gap-4 text-left relative min-h-[220px]">
+              <div className="absolute top-4 right-4 bg-slate-900 border border-slate-800 text-[8px] font-mono text-cyan-400 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                Personality Matrix
+              </div>
+              
+              <div className="flex items-center gap-3 border-b border-slate-900 pb-3">
+                <span className="text-3xl">{PREVIEW_COMPANIONS[activeCompanion].avatar}</span>
+                <div>
+                  <h4 className="text-sm font-black text-white uppercase">
+                    {PREVIEW_COMPANIONS[activeCompanion].name}
+                  </h4>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase">{PREVIEW_COMPANIONS[activeCompanion].role}</p>
+                </div>
+              </div>
+
+              {/* Dynamic Speech bubble */}
+              <div className={`p-4 rounded-2xl border-2 ${PREVIEW_COMPANIONS[activeCompanion].bubbleColor} flex-1 shadow-inner`}>
+                <p className="text-xs leading-relaxed font-mono italic">
+                  {PREVIEW_COMPANIONS[activeCompanion].quote}
+                </p>
+              </div>
+
+              <div className="flex justify-between items-center text-[10px] text-slate-500 font-bold uppercase mt-2 pt-2 border-t border-slate-900">
+                <span>Specialization:</span>
+                <span className="text-slate-300">{PREVIEW_COMPANIONS[activeCompanion].specialty}</span>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-900/60 border border-slate-850 rounded-2xl mt-4 text-[10px] text-slate-400 leading-relaxed italic text-center">
+              💡 Register below to chat with them live about your customized planet state variables!
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Action Footer Call-to-Action */}
+      <section className="w-full max-w-4xl mx-auto px-4 py-12">
+        <div className="bg-gradient-to-tr from-slate-950 to-slate-900 border-4 border-slate-950 rounded-3xl p-8 text-center relative overflow-hidden shadow-2xl flex flex-col items-center gap-5">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-2xl pointer-events-none" />
+          
+          <Globe className="w-12 h-12 text-emerald-400 animate-spin" style={{ animationDuration: '15s' }} />
+
+          <h3 className="text-2xl sm:text-3xl font-black text-white uppercase drop-shadow-md">
+            Claim Your Citizen Passport
+          </h3>
+          
+          <p className="text-xs sm:text-sm text-slate-400 max-w-lg leading-relaxed">
+            Join the eco federation today. Register your passport, select your customized element class, name your utopian planet, and start tracking your carbon footprints!
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            <button
+              onClick={onStart}
+              className="px-8 py-3.5 bg-emerald-400 hover:bg-emerald-300 text-slate-950 text-xs font-black uppercase rounded-xl border-3 border-slate-950 shadow-[3px_3px_0px_#000] hover:scale-105 active:scale-95 transition-all text-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+            >
+              Register Passport (Free)
+            </button>
+            <button
+              onClick={onLogin}
+              className="px-8 py-3.5 bg-slate-900 border-2 border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-xs font-black uppercase rounded-xl text-center transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+            >
+              Sign In To Account
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="w-full max-w-6xl mx-auto px-4 py-8 border-t border-slate-950 text-center text-[10px] text-slate-600 font-medium">
+        <p>© 2026 Green Odyssey & The Planetary Federation. All space rights reserved.</p>
+        <p className="mt-1 font-mono">Designed for Gamified Sustainability, powered by Google Gemini 3.5 Flash.</p>
+      </footer>
+    </div>
+  );
+}
+
 export default function App() {
   // --- Citizen User Auth State ---
   const [currentUser, setCurrentUser] = useState<CitizenUser | null>(() => {
@@ -61,6 +395,7 @@ export default function App() {
   const [authUsername, setAuthUsername] = useState<string>("");
   const [authAvatar, setAuthAvatar] = useState<string>("🦊");
   const [authClass, setAuthClass] = useState<string>("Soil Guardian");
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState<boolean>(false);
 
   // --- Game State ---
   const [planetState, setPlanetState] = useState<PlanetState>({
@@ -445,7 +780,7 @@ export default function App() {
         waterQuality: calculatedWater
       }));
     }
-  }, [planetState.carbonScore, planetState.renewablePercent, planetState.health, planetState.biodiversity, planetState.airQuality, planetState.waterQuality]);
+  }, [planetState.carbonScore, planetState.renewablePercent, planetState.health, planetState.biodiversity]);
 
   // --- Handle Choice Selection in Challenges ---
   const handleSelectChoice = (choice: any) => {
@@ -567,8 +902,21 @@ export default function App() {
       {/* Cartoon Sky Sparkles Background */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(52,211,153,0.12),rgba(0,0,0,0))] pointer-events-none z-0" />
 
-      {/* Retro Game Header */}
-      <header className="relative border-b-4 border-slate-950 bg-slate-900 sticky top-0 z-40 px-4 py-4 shadow-xl">
+      {!currentUser ? (
+        <LandingPage
+          onStart={() => {
+            setAuthMode("register");
+            setAuthModalOpen(true);
+          }}
+          onLogin={() => {
+            setAuthMode("login");
+            setAuthModalOpen(true);
+          }}
+        />
+      ) : (
+        <>
+          {/* Retro Game Header */}
+          <header className="relative border-b-4 border-slate-950 bg-slate-900 sticky top-0 z-40 px-4 py-4 shadow-xl">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           
           {/* Logo Brand Title */}
@@ -596,7 +944,7 @@ export default function App() {
             <div className="flex items-center flex-wrap gap-1.5 p-1 bg-slate-950 rounded-xl border-2 border-slate-800">
               <button
                 onClick={() => handleSetCheatLevel(1)}
-                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent ${
                   planetState.level <= 10 ? "bg-red-500 text-slate-950" : "bg-slate-900 text-slate-300 hover:bg-slate-800"
                 }`}
               >
@@ -604,7 +952,7 @@ export default function App() {
               </button>
               <button
                 onClick={() => handleSetCheatLevel(15)}
-                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-lime-400 focus:border-transparent ${
                   planetState.level === 15 ? "bg-lime-400 text-slate-950" : "bg-slate-900 text-slate-300 hover:bg-slate-800"
                 }`}
               >
@@ -612,7 +960,7 @@ export default function App() {
               </button>
               <button
                 onClick={() => handleSetCheatLevel(40)}
-                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent ${
                   planetState.level === 40 ? "bg-amber-400 text-slate-950" : "bg-slate-900 text-slate-300 hover:bg-slate-800"
                 }`}
               >
@@ -620,7 +968,7 @@ export default function App() {
               </button>
               <button
                 onClick={() => handleSetCheatLevel(65)}
-                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent ${
                   planetState.level === 65 ? "bg-cyan-400 text-slate-950" : "bg-slate-900 text-slate-300 hover:bg-slate-800"
                 }`}
               >
@@ -628,7 +976,7 @@ export default function App() {
               </button>
               <button
                 onClick={() => handleSetCheatLevel(100)}
-                className={`px-3 py-1 text-xs font-bold rounded-lg text-emerald-400 transition-all ${
+                className={`px-3 py-1 text-xs font-bold rounded-lg text-emerald-400 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent ${
                   planetState.level === 100 ? "bg-emerald-400 text-slate-950" : "bg-slate-900 hover:bg-slate-850"
                 }`}
               >
@@ -644,11 +992,8 @@ export default function App() {
               {currentUser ? (
                 <button
                   type="button"
-                  onClick={() => {
-                    const confirmLogout = window.confirm(`Logged in as ${currentUser.username} (${currentUser.characterClass}).\nWould you like to sign out?`);
-                    if (confirmLogout) handleLogout();
-                  }}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-emerald-950/80 border-3 border-emerald-500 rounded-2xl shadow-[3px_3px_0px_#000] cursor-pointer hover:bg-emerald-900 transition-all"
+                  onClick={() => setLogoutConfirmOpen(true)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-emerald-950/80 border-3 border-emerald-500 rounded-2xl shadow-[3px_3px_0px_#000] cursor-pointer hover:bg-emerald-900 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
                   title="Click to sign out of your Citizen account"
                 >
                   <span className="text-xl animate-pulse">{currentUser.avatar}</span>
@@ -661,7 +1006,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => { setAuthMode("login"); setAuthModalOpen(true); }}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-slate-950 hover:bg-slate-850 hover:text-emerald-400 text-slate-300 border-3 border-slate-850 rounded-2xl shadow-[3px_3px_0px_#000] cursor-pointer transition-all"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-slate-950 hover:bg-slate-850 hover:text-emerald-400 text-slate-300 border-3 border-slate-850 rounded-2xl shadow-[3px_3px_0px_#000] cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
                   title="Click to Register or Sign In to save progress"
                 >
                   <User className="w-5 h-5 text-slate-400" />
@@ -902,7 +1247,7 @@ export default function App() {
           <div className="flex bg-slate-950 rounded-2xl p-1.5 border-4 border-slate-950 shadow-[4px_4px_0px_#000]">
             <button
               onClick={() => { setActiveTab("quests"); setChallengeResult(null); }}
-              className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1.5 py-3 rounded-xl text-xs font-black transition-all ${
+              className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1.5 py-3 rounded-xl text-xs font-black transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent ${
                 activeTab === "quests" ? "bg-emerald-400 text-slate-950 shadow-[2px_2px_0px_#000]" : "text-slate-400 hover:text-slate-200"
               }`}
             >
@@ -911,7 +1256,7 @@ export default function App() {
             </button>
             <button
               onClick={() => setActiveTab("store")}
-              className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1.5 py-3 rounded-xl text-xs font-black transition-all ${
+              className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1.5 py-3 rounded-xl text-xs font-black transition-all focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent ${
                 activeTab === "store" ? "bg-amber-400 text-slate-950 shadow-[2px_2px_0px_#000]" : "text-slate-400 hover:text-slate-200"
               }`}
             >
@@ -920,7 +1265,7 @@ export default function App() {
             </button>
             <button
               onClick={() => setActiveTab("galaxy")}
-              className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1.5 py-3 rounded-xl text-xs font-black transition-all ${
+              className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1.5 py-3 rounded-xl text-xs font-black transition-all focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent ${
                 activeTab === "galaxy" ? "bg-cyan-400 text-slate-950 shadow-[2px_2px_0px_#000]" : "text-slate-400 hover:text-slate-200"
               }`}
             >
@@ -929,7 +1274,7 @@ export default function App() {
             </button>
             <button
               onClick={() => setActiveTab("badges")}
-              className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1.5 py-3 rounded-xl text-xs font-black transition-all ${
+              className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1.5 py-3 rounded-xl text-xs font-black transition-all focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent ${
                 activeTab === "badges" ? "bg-purple-400 text-slate-950 shadow-[2px_2px_0px_#000]" : "text-slate-400 hover:text-slate-200"
               }`}
             >
@@ -971,7 +1316,7 @@ export default function App() {
                           <button
                             key={idx}
                             onClick={() => handleSelectChoice(choice)}
-                            className="w-full text-left bg-slate-950/80 hover:bg-slate-950 hover:border-emerald-400 border-2 border-slate-850 p-4 rounded-2xl transition-all group active:scale-98 shadow-md"
+                            className="w-full text-left bg-slate-950/80 hover:bg-slate-950 hover:border-emerald-400 border-2 border-slate-855 p-4 rounded-2xl transition-all group active:scale-98 shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
                           >
                             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                               <span className="text-sm font-extrabold text-white group-hover:text-emerald-400 transition-colors flex items-center gap-2">
@@ -1050,7 +1395,7 @@ export default function App() {
 
                     <button
                       onClick={nextChallenge}
-                      className="px-6 py-3 bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 text-slate-950 text-xs font-extrabold rounded-2xl shadow-[4px_4px_0px_#000] active:translate-y-1 transition-all flex items-center justify-center gap-2 mx-auto"
+                      className="px-6 py-3 bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 text-slate-950 text-xs font-extrabold rounded-2xl shadow-[4px_4px_0px_#000] active:translate-y-1 transition-all flex items-center justify-center gap-2 mx-auto focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
                     >
                       Retrieve Next Adventure!
                       <ArrowRight className="w-4 h-4 text-slate-950" />
@@ -1072,7 +1417,7 @@ export default function App() {
                       <button
                         key={cat}
                         onClick={() => setMarketCategory(cat)}
-                        className={`px-3 py-1 text-[10px] font-black rounded-lg transition-all ${
+                        className={`px-3 py-1 text-[10px] font-black rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent ${
                           marketCategory === cat ? "bg-amber-400 text-slate-950 shadow-sm" : "text-slate-400 hover:text-slate-200"
                         }`}
                       >
@@ -1150,7 +1495,7 @@ export default function App() {
                           {/* Click item buy action button */}
                           <button
                             onClick={() => handleBuyMarketItem(item)}
-                            className="mt-4 w-full py-2 bg-slate-900 hover:bg-amber-400 hover:text-slate-950 text-amber-300 font-extrabold text-xs rounded-xl border-2 border-slate-800 hover:border-slate-950 active:scale-95 transition-all text-center flex items-center justify-center gap-1 hover:cursor-pointer"
+                            className="mt-4 w-full py-2 bg-slate-900 hover:bg-amber-400 hover:text-slate-950 text-amber-300 font-extrabold text-xs rounded-xl border-2 border-slate-800 hover:border-slate-950 active:scale-95 transition-all text-center flex items-center justify-center gap-1 hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
                           >
                             <span>Buy for:</span>
                             <span className="font-mono text-xs">{item.cost} {item.costType === "gems" ? "💎" : "🪙"}</span>
@@ -1200,7 +1545,7 @@ export default function App() {
                         {/* Send love dynamic button */}
                         <button
                           onClick={() => handleLikePlanet(pl.id)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent ${
                             pl.hasLiked
                               ? "bg-rose-950 border border-rose-500 text-rose-300"
                               : "bg-slate-900 border border-slate-800 text-slate-300 hover:text-rose-400 hover:bg-rose-950/40"
@@ -1291,6 +1636,8 @@ export default function App() {
         </section>
 
       </main>
+        </>
+      )}
 
       {/* CITIZEN LOGIN & REGISTRATION MODAL */}
       {authModalOpen && (
@@ -1305,7 +1652,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setAuthMode("login")}
-                  className={`px-3 py-1.5 text-xs font-black uppercase rounded-lg transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 text-xs font-black uppercase rounded-lg transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent ${
                     authMode === "login" 
                       ? "bg-slate-800 text-emerald-400 border border-slate-700" 
                       : "text-slate-400 hover:text-slate-200"
@@ -1316,7 +1663,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setAuthMode("register")}
-                  className={`px-3 py-1.5 text-xs font-black uppercase rounded-lg transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 text-xs font-black uppercase rounded-lg transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent ${
                     authMode === "register" 
                       ? "bg-slate-800 text-emerald-400 border border-slate-700" 
                       : "text-slate-400 hover:text-slate-200"
@@ -1329,7 +1676,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setAuthModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-950 text-slate-400 hover:text-slate-200 border-2 border-slate-855 hover:border-slate-500 hover:bg-slate-900 transition-colors flex items-center justify-center font-bold text-xs cursor-pointer"
+                className="w-8 h-8 rounded-full bg-slate-950 text-slate-400 hover:text-slate-200 border-2 border-slate-855 hover:border-slate-500 hover:bg-slate-900 transition-colors flex items-center justify-center font-bold text-xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
               >
                 ✕
               </button>
@@ -1366,7 +1713,7 @@ export default function App() {
                       placeholder="e.g. Hanna"
                       value={authUsername}
                       onChange={(e) => setAuthUsername(e.target.value)}
-                      className="w-full bg-slate-950 border-2 border-slate-850 focus:border-emerald-400 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 outline-none placeholder-slate-500"
+                      className="w-full bg-slate-950 border-2 border-slate-850 focus:border-transparent focus:ring-2 focus:ring-emerald-400 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 outline-none placeholder-slate-500"
                     />
                   </div>
                 </div>
@@ -1387,7 +1734,7 @@ export default function App() {
                     placeholder="hanna@odyssey.org"
                     value={authEmail}
                     onChange={(e) => setAuthEmail(e.target.value)}
-                    className="w-full bg-slate-950 border-2 border-slate-850 focus:border-emerald-400 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 outline-none placeholder-slate-500"
+                    className="w-full bg-slate-950 border-2 border-slate-850 focus:border-transparent focus:ring-2 focus:ring-emerald-400 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 outline-none placeholder-slate-500"
                   />
                 </div>
               </div>
@@ -1407,7 +1754,7 @@ export default function App() {
                     placeholder="••••••••"
                     value={authPassword}
                     onChange={(e) => setAuthPassword(e.target.value)}
-                    className="w-full bg-slate-950 border-2 border-slate-850 focus:border-emerald-400 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 outline-none placeholder-slate-500"
+                    className="w-full bg-slate-950 border-2 border-slate-850 focus:border-transparent focus:ring-2 focus:ring-emerald-400 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 outline-none placeholder-slate-500"
                   />
                 </div>
               </div>
@@ -1422,7 +1769,7 @@ export default function App() {
                       id="auth-avatar"
                       value={authAvatar}
                       onChange={(e) => setAuthAvatar(e.target.value)}
-                      className="w-full bg-slate-950 border-2 border-slate-850 focus:border-emerald-400 rounded-xl p-2 text-xs text-slate-100 outline-none cursor-pointer"
+                      className="w-full bg-slate-950 border-2 border-slate-850 focus:border-transparent focus:ring-2 focus:ring-emerald-400 rounded-xl p-2 text-xs text-slate-100 outline-none cursor-pointer"
                     >
                       <option value="🦊">🦊 Eco-Fox</option>
                       <option value="🦉">🦉 Wise Owl</option>
@@ -1440,7 +1787,7 @@ export default function App() {
                       id="auth-class"
                       value={authClass}
                       onChange={(e) => setAuthClass(e.target.value)}
-                      className="w-full bg-slate-950 border-2 border-slate-850 focus:border-emerald-400 rounded-xl p-2 text-xs text-slate-100 outline-none cursor-pointer"
+                      className="w-full bg-slate-950 border-2 border-slate-850 focus:border-transparent focus:ring-2 focus:ring-emerald-400 rounded-xl p-2 text-xs text-slate-100 outline-none cursor-pointer"
                     >
                       <option value="Soil Guardian">Soil Guardian</option>
                       <option value="Wind Weaver">Wind Weaver</option>
@@ -1453,11 +1800,71 @@ export default function App() {
 
               <button
                 type="submit"
-                className="w-full py-2.5 bg-emerald-400 hover:bg-emerald-300 text-slate-950 rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-[3px_3px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 cursor-pointer mt-2"
+                className="w-full py-2.5 bg-emerald-400 hover:bg-emerald-300 text-slate-950 rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-[3px_3px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 cursor-pointer mt-2 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
               >
                 {authMode === "login" ? "Confirm Entry" : "Create Passport"}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* CITIZEN LOGOUT CONFIRMATION MODAL */}
+      {logoutConfirmOpen && currentUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
+          <div 
+            className="w-full max-w-md bg-slate-900 border-4 border-slate-950 rounded-3xl p-6 shadow-[8px_8px_0px_#000] relative text-left"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b-2 border-slate-950 pb-4 mb-4">
+              <h4 className="text-sm font-black text-white uppercase tracking-wide flex items-center gap-1.5">
+                <LogOut className="w-4 h-4 text-red-400" />
+                Sign Out Passport
+              </h4>
+              <button
+                type="button"
+                onClick={() => setLogoutConfirmOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-950 text-slate-400 hover:text-slate-200 border-2 border-slate-855 hover:border-slate-500 hover:bg-slate-900 transition-colors flex items-center justify-center font-bold text-xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent"
+                id="close-logout-confirm"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mb-6 flex flex-col gap-3">
+              <div className="flex items-center gap-3 p-3 bg-slate-950 rounded-2xl border border-slate-850">
+                <span className="text-3xl">{currentUser.avatar}</span>
+                <div>
+                  <p className="text-xs font-black text-white">{currentUser.username}</p>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase">{currentUser.characterClass}</p>
+                </div>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Are you sure you want to sign out and exit your virtual planet? Your achievements, coins, and structures are safely saved to the database.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setLogoutConfirmOpen(false)}
+                className="flex-1 py-2.5 bg-slate-950 hover:bg-slate-850 text-slate-300 rounded-xl font-black text-xs uppercase tracking-wider border-2 border-slate-850 hover:border-slate-700 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent"
+                id="cancel-logout"
+              >
+                Keep Exploring
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  handleLogout();
+                  setLogoutConfirmOpen(false);
+                }}
+                className="flex-1 py-2.5 bg-red-500 hover:bg-red-400 text-slate-950 rounded-xl font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_#000] border-2 border-slate-950 hover:scale-102 active:translate-x-0.5 active:translate-y-0.5 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent"
+                id="confirm-logout"
+              >
+                Confirm Sign Out
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -215,6 +215,52 @@ export const PlanetCanvas: React.FC<PlanetCanvasProps> = ({
 
   const [precalculatedLandmarks] = useState<RenderableObject[]>(createLandmarks);
 
+  // Memoize positions of purchased items to avoid raw string hashing/coordinate calculations inside requestAnimationFrame loop
+  const purchasedItemLandmarks = React.useMemo(() => {
+    const list: {
+      lat: number;
+      lon: number;
+      size: number;
+      extra: { itemId: string; index: number };
+    }[] = [];
+
+    marketItems.forEach((item) => {
+      if (item.purchasedCount > 0) {
+        const count = Math.min(15, item.purchasedCount);
+        for (let i = 0; i < count; i++) {
+          // Seeded deterministic pseudo-random generator
+          let seed = 0;
+          const str = item.id + "_" + i;
+          for (let c = 0; c < str.length; c++) {
+            seed = (seed * 31 + str.charCodeAt(c)) % 9999999;
+          }
+          const rnd = () => {
+            seed = (seed * 1664525 + 1013904223) % 4294967296;
+            return seed / 4294967296;
+          };
+
+          let lat = 0;
+          let lon = rnd() * Math.PI * 2;
+          if (item.category === "Nature") {
+            lat = (rnd() - 0.5) * Math.PI * 0.55;
+          } else if (item.category === "Wildlife") {
+            lat = (rnd() - 0.5) * Math.PI * 0.8;
+          } else {
+            lat = (rnd() - 0.5) * Math.PI * 0.45;
+          }
+
+          list.push({
+            lat,
+            lon,
+            size: 8 + rnd() * 6,
+            extra: { itemId: item.id, index: i }
+          });
+        }
+      }
+    });
+    return list;
+  }, [marketItems]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -448,48 +494,20 @@ export const PlanetCanvas: React.FC<PlanetCanvasProps> = ({
         }
       });
 
-      // Dynamically add purchased store items
-      marketItems.forEach((item) => {
-        if (item.purchasedCount > 0) {
-          // Cap visible items per item type to avoid overcrowding
-          const count = Math.min(15, item.purchasedCount);
-          for (let i = 0; i < count; i++) {
-            // Seeded deterministic pseudo-random generator
-            let seed = 0;
-            const str = item.id + "_" + i;
-            for (let c = 0; c < str.length; c++) {
-              seed = (seed * 31 + str.charCodeAt(c)) % 9999999;
-            }
-            const rnd = () => {
-              seed = (seed * 1664525 + 1013904223) % 4294967296;
-              return seed / 4294967296;
-            };
-
-            // Calculate deterministic lat, lon
-            let lat = 0;
-            let lon = rnd() * Math.PI * 2;
-            if (item.category === "Nature") {
-              lat = (rnd() - 0.5) * Math.PI * 0.55;
-            } else if (item.category === "Wildlife") {
-              lat = (rnd() - 0.5) * Math.PI * 0.8;
-            } else {
-              lat = (rnd() - 0.5) * Math.PI * 0.45;
-            }
-
-            const projected = projectCoors(lat, lon);
-            if (projected.z > -r * 0.2) {
-              renderQueue.push({
-                type: "purchased_item",
-                valX: projected.x,
-                valY: projected.y,
-                valZ: projected.z,
-                lat,
-                lon,
-                size: 8 + rnd() * 6,
-                extra: { itemId: item.id, index: i }
-              });
-            }
-          }
+      // Dynamically add purchased store items from memoized cache
+      purchasedItemLandmarks.forEach((landmark) => {
+        const projected = projectCoors(landmark.lat, landmark.lon);
+        if (projected.z > -r * 0.2) {
+          renderQueue.push({
+            type: "purchased_item",
+            valX: projected.x,
+            valY: projected.y,
+            valZ: projected.z,
+            lat: landmark.lat,
+            lon: landmark.lon,
+            size: landmark.size,
+            extra: landmark.extra
+          });
         }
       });
 

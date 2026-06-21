@@ -1,6 +1,7 @@
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 import crypto from "crypto";
+import { CitizenUser, PlanetState } from "./src/types";
 
 dotenv.config();
 
@@ -202,7 +203,7 @@ export async function getUserState(userId: string) {
   };
 }
 
-export async function registerUser(profile: any, state: any, items: any[]) {
+export async function registerUser(profile: CitizenUser, state: PlanetState, items: { id: string; purchasedCount: number }[]) {
   if (useFallback) {
     const hashedPass = hashPassword(profile.customPassword, profile.email);
     const savedProfile = {
@@ -278,7 +279,7 @@ export async function registerUser(profile: any, state: any, items: any[]) {
   }
 }
 
-export async function syncUserState(userId: string, state: any, items: any[]) {
+export async function syncUserState(userId: string, state: PlanetState, items: { id: string; purchasedCount: number }[]) {
   if (useFallback) {
     fallbackStates.set(userId, state);
     fallbackItems.set(userId, items.map(itm => ({ id: itm.id, purchasedCount: itm.purchasedCount })));
@@ -341,4 +342,19 @@ export async function syncUserState(userId: string, state: any, items: any[]) {
   } finally {
     connection.release();
   }
+}
+
+export async function deleteUserForTest(userId: string) {
+  if (useFallback) {
+    fallbackStates.delete(userId);
+    fallbackItems.delete(userId);
+    for (const [email, u] of fallbackUsers.entries()) {
+      if (u.id === userId) {
+        fallbackUsers.delete(email);
+        break;
+      }
+    }
+    return;
+  }
+  await pool.query("DELETE FROM users WHERE id = ?", [userId]);
 }

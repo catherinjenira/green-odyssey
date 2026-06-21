@@ -1,9 +1,11 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { hashPassword, registerUser, getUserByEmail, getUserState, syncUserState, initDB, useFallback } from "./db";
+import { hashPassword, registerUser, getUserByEmail, getUserState, syncUserState, initDB, useFallback, deleteUserForTest } from "./db";
 
 beforeAll(async () => {
   // Initialize DB. This will set up connection or trigger useFallback = true automatically.
   await initDB();
+  // Cleanup test user ID to avoid Primary Key duplicate errors across multiple test runs
+  await deleteUserForTest("u_test_user_1");
 });
 
 describe("Password Hashing & Security", () => {
