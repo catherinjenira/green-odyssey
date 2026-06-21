@@ -1,7 +1,7 @@
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 import crypto from "crypto";
-import { CitizenUser, PlanetState } from "./src/types.ts";
+import { CitizenUser, PlanetState } from "./src/types.js";
 
 dotenv.config();
 

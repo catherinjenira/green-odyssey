@@ -3,8 +3,8 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
-import { initDB, getUserByEmail, getUserState, registerUser, syncUserState, hashPassword } from "./db.ts";
-import { validateEmail, validateUsername, validatePassword, validatePlanetState } from "./validation.ts";
+import { initDB, getUserByEmail, getUserState, registerUser, syncUserState, hashPassword } from "./db.js";
+import { validateEmail, validateUsername, validatePassword, validatePlanetState } from "./validation.js";
 
 dotenv.config();
 
